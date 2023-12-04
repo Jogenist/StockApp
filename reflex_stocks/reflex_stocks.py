@@ -176,7 +176,7 @@ def navbar_logout():
                 rx.heading("Virtual Stock Portfolio",color="white"),
             ),
             rx.flex(
-            rx.menu(rx.menu_button("Menu", **button_style),rx.menu_list(rx.menu_item(rx.link(rx.text("Main Page"),href="/")),rx.menu_item(rx.link(rx.text("Generate DataSets"),href="/data")),rx.menu_item(rx.link(rx.text("Compare DataSets"),href="/cpm")),rx.menu_divider(),rx.menu_item(rx.link(rx.text("Known Issues"),href="/issues")),rx.menu_item(rx.link(rx.text("Help"),href="/help")))),
+            rx.menu(rx.menu_button("Menu", **button_style),rx.menu_list(rx.menu_item(rx.link(rx.text("Main Page"),href="/")),rx.menu_divider(),rx.menu_item(rx.link(rx.text("Known Issues"),href="/issues")),rx.menu_item(rx.link(rx.text("Help"),href="/help")))),
             rx.spacer(),
             rx.button(
                 rx.icon(tag="moon"),
