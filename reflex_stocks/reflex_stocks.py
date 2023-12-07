@@ -123,8 +123,8 @@ def navbar_login():
     return rx.box(
         rx.hstack(
             rx.hstack(
-                rx.link(rx.image(src="/logo.png",width='150px'),href="/"),
-                rx.heading("Virtual Stock Portfolio",color="white"),
+                rx.link(rx.image(src="/logo_v2.png",width='150px'),href="/"),
+                #rx.heading("Virtual Stock Portfolio",color="white"),
             ),
             rx.flex(
             rx.button(rx.icon(tag="lock"), on_click=State.show_login),
