@@ -115,6 +115,9 @@ class State(rx.State):
             users = session.query(User).all()
         print(users)
 
+    def logout(self):
+        self.login_state = False
+        print('logged out')
     pass
 
 
@@ -123,8 +126,8 @@ def navbar_login():
     return rx.box(
         rx.hstack(
             rx.hstack(
-                rx.link(rx.image(src="/logo.png",width='150px'),href="/"),
-                rx.heading("Virtual Stock Portfolio",color="white"),
+                rx.link(rx.image(src="/logo_v2.png",width='150px'),href="/"),
+                #rx.heading("Virtual Stock Portfolio",color="white"),
             ),
             rx.flex(
             rx.button(rx.icon(tag="lock"), on_click=State.show_login),
@@ -172,17 +175,19 @@ def navbar_logout():
     return rx.box(
         rx.hstack(
             rx.hstack(
-                rx.link(rx.image(src="/logo.png",width='150px'),href="/"),
-                rx.heading("Virtual Stock Portfolio",color="white"),
+                rx.link(rx.image(src="/logo_v2.png",width='150px'),href="/"),
+                #rx.heading("Virtual Stock Portfolio",color="white"),
             ),
             rx.flex(
             rx.menu(rx.menu_button("Menu", **button_style),rx.menu_list(rx.menu_item(rx.link(rx.text("Main Page"),href="/")),rx.menu_divider(),rx.menu_item(rx.link(rx.text("Known Issues"),href="/issues")),rx.menu_item(rx.link(rx.text("Help"),href="/help")))),
+            rx.spacer(),
+            rx.link(rx.button('Logout',on_click=State.logout),href="\\"),
             rx.spacer(),
             rx.button(
                 rx.icon(tag="moon"),
                 on_click=rx.toggle_color_mode,
 
-            ),width="7%"),
+            ),width="10%"),
             justify="space-between",
             border_bottom="0.08em solid #F0F0F0",
             padding_x="2em",
@@ -199,7 +204,13 @@ def navbar_logout():
 def index() -> rx.Component:
     return rx.center(
         rx.vstack(
-            navbar_login(),
+            #two different navbars depending on login_state
+            rx.cond(State.login_state,
+                    navbar_logout()
+                    ),
+            rx.cond(~State.login_state,
+                    navbar_login(),
+                    ),
             rx.cond(State.login_state,
                     rx.text("You are logged in as ",State.input_user)),
             rx.cond(State.login_state,rx.link(rx.button("Open Portfolio"),href='\main')),
