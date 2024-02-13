@@ -8,10 +8,19 @@ button_style = {
     "_hover": {"color": "rgb(107,99,246)", "text_decoration": "none"},
 }
 
+class Portfolio(rx.Model, table=True):
+    username: str
+    stock_name: str
+    stock_wkn: str
+    stock_amount: int
+    stock_price_now: float
+    stock_price_initial: float
+
 class User(rx.Model, table=True):
     username: str
     email: str
     password: str 
+
 
 
 class State(rx.State):
@@ -26,6 +35,7 @@ class State(rx.State):
     log_pw_err: bool = False
     reg_usr_err: bool = False
     reg_pw_err: bool =False
+    Stocklist: list = []
 
     def show_login(self):
         self.show_log = not (self.show_log)
@@ -98,17 +108,30 @@ class State(rx.State):
         print('User added')
         
 
-
     def write_db(self):
-        with rx.session() as session:
-            session.add(
-                User(
-                    username="test",
-                    email="test@admin.de",
-                    password="123",
-                )
-            )
-            session.commit()
+        print("debug")
+        pass
+        # with rx.session() as session:
+        #     session.add(
+        #         User(
+        #             username="test",
+        #             email="test@admin.de",
+        #             password="123",
+        #         )
+        #     )
+        #     session.commit()
+        # with rx.session() as session:
+        #     session.add(
+        #         Portfolio(
+        #             username="test",
+        #             stock_name="Test_Stock",
+        #             stock_wkn="ABCDEF",
+        #             stock_amount="1337",
+        #             stock_price_now="1337",
+        #             stock_price_initial="1337"
+        #         )
+        #     )
+        #     session.commit()
     
     def read_db(self):
         with rx.session() as session:
@@ -118,6 +141,16 @@ class State(rx.State):
     def logout(self):
         self.login_state = False
         print('logged out')
+
+    def print_Stocklist(self):
+        #collect all stocks
+        with rx.session() as session:
+            stocks = session.query(Portfolio).all()
+
+        for i in stocks:
+            #if i.user == self.input_user:
+            self.Stocklist.append(i.stock_name)
+        yield
     pass
 
 
@@ -130,7 +163,7 @@ def navbar_login():
                 #rx.heading("Virtual Stock Portfolio",color="white"),
             ),
             rx.flex(
-            rx.button(rx.icon(tag="lock"), on_click=State.show_login),
+            rx.tooltip(rx.button(rx.lucide.icon(tag="log-in"), on_click=State.show_login),label="Sign-In"),
             rx.modal(rx.modal_overlay(rx.modal_content(
                                 rx.modal_header(rx.flex("Login",rx.spacer(),rx.button(rx.icon(tag="small_close"), on_click=State.show_login))),
                                 rx.modal_body("sign in with your credentials or create a new account"),
@@ -141,7 +174,7 @@ def navbar_login():
                                 rx.modal_footer(rx.button("Login",on_click=State.login)),
                                 )),is_open=State.show_log,),
             rx.spacer(),
-            rx.button(rx.icon(tag="add"), on_click=State.show_register),
+            rx.tooltip(rx.button(rx.lucide.icon(tag="plus-circle"), on_click=State.show_register),label="Register"),
             rx.modal(rx.modal_overlay(rx.modal_content(
                                 rx.modal_header(rx.flex("Register",rx.spacer(),rx.button(rx.icon(tag="small_close"), on_click=State.show_register))),
                                 rx.modal_body("create a new account"),
@@ -181,7 +214,7 @@ def navbar_logout():
             rx.flex(
             rx.menu(rx.menu_button("Menu", **button_style),rx.menu_list(rx.menu_item(rx.link(rx.text("Main Page"),href="/")),rx.menu_divider(),rx.menu_item(rx.link(rx.text("Known Issues"),href="/issues")),rx.menu_item(rx.link(rx.text("Help"),href="/help")))),
             rx.spacer(),
-            rx.link(rx.button('Logout',on_click=State.logout),href="\\"),
+            rx.link(rx.button(rx.lucide.icon(tag="log-out"),on_click=State.logout),href="/"),
             rx.spacer(),
             rx.button(
                 rx.icon(tag="moon"),
@@ -223,6 +256,9 @@ def main() -> rx.Component:
         rx.vstack(
             navbar_logout(),
             rx.text("main portfolio page"),
+            #show a list of stocks listed with the current logged in user name
+            rx.button("Test",on_click=State.print_Stocklist),
+            rx.list(items=State.Stocklist,spacing=".25em"),
             spacing="1.5em",
             font_size="1em",
         ),
@@ -234,4 +270,4 @@ def main() -> rx.Component:
 app = rx.App()
 app.add_page(index)
 app.add_page(main)
-app.compile()
+#app.compile() #deprecated in 0.3.8
