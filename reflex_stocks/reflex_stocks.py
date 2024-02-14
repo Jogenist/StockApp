@@ -2,6 +2,7 @@
 from rxconfig import config
 
 import reflex as rx
+import yfinance as yf
 
 button_style = {
     "color": "white",
@@ -36,6 +37,7 @@ class State(rx.State):
     reg_usr_err: bool = False
     reg_pw_err: bool =False
     Stocklist: list = []
+    columns: list = ['stock name', 'stock wkn', 'stock amount', 'stock price now', 'stock price initial']
 
     def show_login(self):
         self.show_log = not (self.show_log)
@@ -142,15 +144,21 @@ class State(rx.State):
         self.login_state = False
         print('logged out')
 
-    def print_Stocklist(self):
+    def get_Stocklist(self):
         #collect all stocks
         with rx.session() as session:
             stocks = session.query(Portfolio).all()
 
         for i in stocks:
-            #if i.user == self.input_user:
-            self.Stocklist.append(i.stock_name)
+            if i.username == self.input_user:
+                print('user stock found.')
+                self.Stocklist.append([i.stock_name,i.stock_wkn,i.stock_amount,i.stock_price_now,i.stock_price_initial])
         yield
+
+    def buy_one_stock(self):
+        wkn='A0HGDX'
+        stock_data = yf.download(wkn, period="1d")
+        print(stock_data)
     pass
 
 
@@ -246,7 +254,7 @@ def index() -> rx.Component:
                     ),
             rx.cond(State.login_state,
                     rx.text("You are logged in as ",State.input_user)),
-            rx.cond(State.login_state,rx.link(rx.button("Open Portfolio"),href='\main')),
+            rx.cond(State.login_state,rx.link(rx.button("Open Portfolio"),on_click=State.get_Stocklist,href='\main')),
         ),
         padding_top="10%")
 
@@ -257,8 +265,13 @@ def main() -> rx.Component:
             navbar_logout(),
             rx.text("main portfolio page"),
             #show a list of stocks listed with the current logged in user name
-            rx.button("Test",on_click=State.print_Stocklist),
-            rx.list(items=State.Stocklist,spacing=".25em"),
+            rx.button('BUY',on_click=State.buy_one_stock),
+            rx.box(rx.data_table(data=State.Stocklist,columns=State.columns,
+                pagination=False,
+                search=True,
+                sort=True,
+                resizable=True),
+                width="70%"),
             spacing="1.5em",
             font_size="1em",
         ),
